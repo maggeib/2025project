@@ -8,8 +8,11 @@
 #
 
 library(shiny)
+library(bslib)
+library(htmltools)
+library(shinydashboard)
 
-#all teams to check page for
+#Teams to create dynamic page for
 teams <- c("UK - Panoramic Care",
            "UK - Panoramic Housing",
            "UK - Panoramic Public Sector",
@@ -28,24 +31,54 @@ teams <- c("UK - Panoramic Care",
            "ID - 360",
            "ID - Delivery",
            "ID - Data"
-           )
+)
 
-ui <- fluidPage(
-  
-  titlePanel("PRG Sales and Data"),
-  sidebarLayout(
-    sidebarPanel(
-      "Menu",
-    selectizeInput("team", "Select Team to view", teams, selected = NULL, multiple = FALSE)
-    ),
-    mainPanel(
-      "Sales by team"
+#Define UI for application
+ui <- dashboardPage(skin = "purple",
+  dashboardHeader(title = "PRG Analytics"),
+  dashboardSidebar(
+    sidebarMenu( #create tabs in sidebar
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+      menuItem("Team Of The Month", tabName = "team_of_the_month", icon = icon("trophy")),
+      selectInput("team", "Select Team:", choices = teams),
+      dateRangeInput("dateRange", "Select Date Range", #create daterange entry
+                     start = NULL,
+                     end = NULL,
+                     min = NULL,
+                     max = NULL,
+                     format = "yyyy-mm-dd",
+                     startview = "month",
+                     weekstart = 0,
+                     language = "en",
+                     separator = " to ",
+                     width = NULL,
+                     autoclose = TRUE
       )
     )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "dashboard",
+              fluidRow(
+                box(title = "Team Data", background = "purple", solidHeader = TRUE, #box1
+                    plotOutput("teamPlot")),
+                infoBox("Target", 10 * 2, icon = icon("handshake"))
+              )
+      ),
+      tabItem(tabName = "Team Of The Month",
+              box(width = 10, background = "purple")
+              )
+    )
   )
-
+)
+# Define server logic. you can set invalidation/validations here
+#can set how the code executes to respond to any input updates
 server <- function(input, output){
+  output$teamPlot <- renderPlot({
+    # Placeholder for plot logic
+    plot(1:10, main = paste("Data for", input$teams))
+  })
 }
 
+# Run the application
 shinyApp(ui = ui, server = server)
-
